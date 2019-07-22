@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <iostream>
 #include <zinx.h>
+#include <map>
 
 using namespace std;
 
@@ -48,8 +49,12 @@ class echo :public AZinxHandler {
 	{
 		/*将数据输出到标准输出*/
 		GET_REF2DATA(BytesMsg, byte, _oInput);
-	
-		ZinxKernel::Zinx_SendOut(byte.szData, *(ZinxKernel::Zinx_GetChannel_ByInfo("stdout_channel")));
+		Ichannel *pchannel = ZinxKernel::Zinx_GetChannel_ByInfo("stdout_channel");
+		if (NULL != pchannel)
+		{
+			ZinxKernel::Zinx_SendOut(byte.szData, *pchannel);
+		}
+		
 
 		return nullptr;
 	}
@@ -78,8 +83,39 @@ class exitFramework :public AZinxHandler {
 };
 
 exitFramework g_exit;
+class output_mng :public AZinxHandler {
+	Ichannel *m_channel = NULL;
+	// 通过 AZinxHandler 继承
+	virtual IZinxMsg * InternelHandle(IZinxMsg & _oInput) override
+	{
+		if (NULL == m_channel)
+		{
+			Ichannel *pchannel = ZinxKernel::Zinx_GetChannel_ByInfo("stdout_channel");
+			m_channel = pchannel;
+		}
+		
+		GET_REF2DATA(BytesMsg, byte, _oInput);
+		//摘出输出通道
+		if ("close" == byte.szData)
+		{
+			ZinxKernel::Zinx_Del_Channel(*m_channel);
+		}
+		else
+		{
+			//添加输出通道
+			ZinxKernel::Zinx_Add_Channel(*m_channel);
+		}
+		return nullptr;
+	}
+	virtual AZinxHandler * GetNextHandler(IZinxMsg & _oNextMsg) override
+	{
+		return nullptr;
+	}
+};
 
+output_mng g_output_mng;
 class cmd :public AZinxHandler {
+	map<string, AZinxHandler *> m_cmd_map;
 	// 通过 AZinxHandler 继承
 	virtual IZinxMsg * InternelHandle(IZinxMsg & _oInput) override
 	{
@@ -91,17 +127,22 @@ class cmd :public AZinxHandler {
 	{
 		/*返回echo对象或者exitframework对象*/
 		GET_REF2DATA(BytesMsg, byte, _oNextMsg);
-		if ("exit" == byte.szData)
+		
+		//若是命令，则分发给对应处理对象
+		if (m_cmd_map.end() != m_cmd_map.find(byte.szData))
 		{
-			//返回退出类的对象
-			return &g_exit;
+			return m_cmd_map[byte.szData];
 		}
+		//若不是命令则发给回显类
 		else
 		{
-			//返回回显对象
 			return &g_echo;
 		}
-		return nullptr;
+	}
+public:
+	void add_cmd(string _cmd, AZinxHandler *_handler)
+	{
+		m_cmd_map[_cmd] = _handler;
 	}
 };
 
@@ -142,6 +183,8 @@ class stdin_channel :public Ichannel {
 	}
 };
 
+
+
 int main()
 {
 	//1. 初始化框架
@@ -152,6 +195,9 @@ int main()
 		//4. 添加通道类对象到kernel中
 		ZinxKernel::Zinx_Add_Channel(*pstdin_channel);
 		ZinxKernel::Zinx_Add_Channel(*pstdout_channel);
+		g_cmd.add_cmd("exit", &g_exit);
+		g_cmd.add_cmd("close", &g_output_mng);
+		g_cmd.add_cmd("open", &g_output_mng);
 		//5. 调用run
 		ZinxKernel::Zinx_Run();
 
