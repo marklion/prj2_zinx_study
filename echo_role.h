@@ -21,6 +21,7 @@ class exit_framework_role :public Irole {
 };
 
 class output_mng_role :public Irole {
+	Ichannel *m_channle = NULL;
 	// Í¨¹ý Irole ¼Ì³Ð
 	virtual bool Init() override;
 	virtual UserData * ProcMsg(UserData & _poUserData) override;

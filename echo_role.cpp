@@ -41,11 +41,15 @@ void echo_role::Fini()
 
 bool exit_framework_role::Init()
 {
-	return false;
+	return true;
 }
 
 UserData * exit_framework_role::ProcMsg(UserData & _poUserData)
 {
+	GET_REF2DATA(cmd_msg, cmd, _poUserData);
+	if (cmd.is_frame_exit) {
+		ZinxKernel::Zinx_Exit();
+	}
 	return nullptr;
 }
 
@@ -55,11 +59,29 @@ void exit_framework_role::Fini()
 
 bool output_mng_role::Init()
 {
-	return false;
+	return true;
 }
 
 UserData * output_mng_role::ProcMsg(UserData & _poUserData)
 {
+	GET_REF2DATA(cmd_msg, cmd, _poUserData);
+	
+	if (NULL == m_channle)
+	{
+		m_channle = ZinxKernel::Zinx_GetChannel_ByInfo("stdout_channel");
+	}
+
+	if (cmd.output_open == true)
+	{
+		/*打开输出通道*/
+		ZinxKernel::Zinx_Add_Channel(*m_channle);
+	}
+	else
+	{
+		/*关闭输出通道*/
+		ZinxKernel::Zinx_Del_Channel(*m_channle);
+	}
+
 	return nullptr;
 }
 

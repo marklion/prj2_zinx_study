@@ -220,6 +220,10 @@ int main()
 		/*添加role对象到kernel*/
 		echo_role *pecho = new echo_role();
 		ZinxKernel::Zinx_Add_Role(*pecho);
+		auto pexit = new exit_framework_role();
+		ZinxKernel::Zinx_Add_Role(*pexit);
+		auto poutput_mng = new output_mng_role();
+		ZinxKernel::Zinx_Add_Role(*poutput_mng);
 		ZinxKernel::Zinx_Run();
 
 		ZinxKernel::ZinxKernelFini();
