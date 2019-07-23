@@ -75,9 +75,19 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ClCompile Include="adv_stdin_channel.cpp" />
+    <ClCompile Include="adv_stdout_channel.cpp" />
+    <ClCompile Include="cmd_msg.cpp" />
+    <ClCompile Include="cmd_parse_protocol.cpp" />
+    <ClCompile Include="echo_role.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="adv_stdin_channel.h" />
+    <ClInclude Include="adv_stdout_channel.h" />
+    <ClInclude Include="cmd_msg.h" />
+    <ClInclude Include="cmd_parse_protocol.h" />
+    <ClInclude Include="echo_role.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

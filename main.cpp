@@ -2,11 +2,14 @@
 #include <iostream>
 #include <zinx.h>
 #include <map>
+#include "adv_stdin_channel.h"
+#include "adv_stdout_channel.h"
+#include "echo_role.h"
 
 using namespace std;
 
 
-
+#if 0
 //创建标准输出通道类
 class stdout_channel :public Ichannel {
 	// 通过 Ichannel 继承
@@ -183,13 +186,15 @@ class stdin_channel :public Ichannel {
 	}
 };
 
-
+#endif
 
 int main()
 {
+
 	//1. 初始化框架
 	if (true == ZinxKernel::ZinxKernelInit())
 	{
+#if 0
 		stdin_channel *pstdin_channel = new stdin_channel();
 		stdout_channel *pstdout_channel = new stdout_channel();
 		//4. 添加通道类对象到kernel中
@@ -206,6 +211,16 @@ int main()
 
 		delete pstdin_channel;
 		delete pstdout_channel;
+#endif
+		/*添加通道到kernel*/
+		adv_stdin_channel *pin = new adv_stdin_channel();
+		adv_stdout_channel *pout = new adv_stdout_channel();
+		ZinxKernel::Zinx_Add_Channel(*pin);
+		ZinxKernel::Zinx_Add_Channel(*pout);
+		/*添加role对象到kernel*/
+		echo_role *pecho = new echo_role();
+		ZinxKernel::Zinx_Add_Role(*pecho);
+		ZinxKernel::Zinx_Run();
 
 		ZinxKernel::ZinxKernelFini();
 	}
