@@ -44,6 +44,9 @@ std::string * cmd_parse_protocol::response2raw(UserData & _oUserData)
 
 Irole * cmd_parse_protocol::GetMsgProcessor(UserDataMsg & _oUserDataMsg)
 {
+	//记录数据来源的通道信息
+	szInputChannelInfo = _oUserDataMsg.szInfo;
+
 	//判断消息内容分发到不同role对象
 	GET_REF2DATA(cmd_msg, output, *_oUserDataMsg.poUserData);
 	//查找role对象函数
@@ -84,5 +87,9 @@ Irole * cmd_parse_protocol::GetMsgProcessor(UserDataMsg & _oUserDataMsg)
 
 Ichannel * cmd_parse_protocol::GetMsgSender(BytesMsg & _oBytes)
 {
-	return ZinxKernel::Zinx_GetChannel_ByInfo("stdout_channel");;
+	if (szInputChannelInfo == "stdin_channel")
+	{
+		return ZinxKernel::Zinx_GetChannel_ByInfo("stdout_channel");
+	}
+	return ZinxKernel::Zinx_GetChannel_ByInfo(szInputChannelInfo);
 }

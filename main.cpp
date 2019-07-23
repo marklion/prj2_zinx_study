@@ -5,6 +5,8 @@
 #include "adv_stdin_channel.h"
 #include "adv_stdout_channel.h"
 #include "echo_role.h"
+#include <ZinxTCP.h>
+#include "my_tcpData.h"
 
 using namespace std;
 
@@ -217,6 +219,10 @@ int main()
 		adv_stdout_channel *pout = new adv_stdout_channel();
 		ZinxKernel::Zinx_Add_Channel(*pin);
 		ZinxKernel::Zinx_Add_Channel(*pout);
+
+		/*添加监听通道到kernel*/
+		auto plisten = new ZinxTCPListen(33333, new my_tcpconnFact());
+		ZinxKernel::Zinx_Add_Channel(*plisten);
 		/*添加role对象到kernel*/
 		echo_role *pecho = new echo_role();
 		ZinxKernel::Zinx_Add_Role(*pecho);

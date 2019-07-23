@@ -1,10 +1,13 @@
 #pragma once
 #include <zinx.h>
+#include <string>
+
 class cmd_parse_protocol :
 	public Iprotocol
 {
 	cmd_parse_protocol();
 	static cmd_parse_protocol m_instance;
+	std::string szInputChannelInfo;
 public:
 	
 	static cmd_parse_protocol *GetInstance() { return &m_instance; }
