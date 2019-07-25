@@ -26,6 +26,8 @@ bool adv_stdout_channel::ReadFd(std::string & _input)
 bool adv_stdout_channel::WriteFd(std::string & _output)
 {
 	cout << _output << endl;
+
+	return true;
 }
 
 void adv_stdout_channel::Fini()

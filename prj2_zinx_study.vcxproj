@@ -82,6 +82,7 @@
     <ClCompile Include="echo_role.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my_tcpData.cpp" />
+    <ClCompile Include="timer_channel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="adv_stdin_channel.h" />
@@ -90,6 +91,7 @@
     <ClInclude Include="cmd_parse_protocol.h" />
     <ClInclude Include="echo_role.h" />
     <ClInclude Include="my_tcpData.h" />
+    <ClInclude Include="timer_channel.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

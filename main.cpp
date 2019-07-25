@@ -7,6 +7,7 @@
 #include "echo_role.h"
 #include <ZinxTCP.h>
 #include "my_tcpData.h"
+#include "timer_channel.h"
 
 using namespace std;
 
@@ -190,6 +191,15 @@ class stdin_channel :public Ichannel {
 
 #endif
 
+
+class timer_out_hello :public timeout_task {
+	// 通过 timeout_task 继承
+	virtual void proc_timeout() override
+	{
+		cout << "hello " << endl;
+	}
+};
+
 int main()
 {
 
@@ -223,6 +233,15 @@ int main()
 		/*添加监听通道到kernel*/
 		auto plisten = new ZinxTCPListen(33333, new my_tcpconnFact());
 		ZinxKernel::Zinx_Add_Channel(*plisten);
+
+		/*添加定时器通道到kernel中*/
+		auto ptimerchannel = new timer_channel();
+		ZinxKernel::Zinx_Add_Channel(*ptimerchannel);
+
+		/*注册定时器任务*/
+		timer_out_hello my_task;
+		timeout_deliver::GetInstance()->register_task(3, &my_task);
+
 		/*添加role对象到kernel*/
 		echo_role *pecho = new echo_role();
 		ZinxKernel::Zinx_Add_Role(*pecho);
@@ -230,6 +249,7 @@ int main()
 		ZinxKernel::Zinx_Add_Role(*pexit);
 		auto poutput_mng = new output_mng_role();
 		ZinxKernel::Zinx_Add_Role(*poutput_mng);
+
 		ZinxKernel::Zinx_Run();
 
 		ZinxKernel::ZinxKernelFini();

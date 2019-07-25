@@ -12,6 +12,7 @@ echo_role::~echo_role()
 {
 }
 
+/*调用时机--》被添加到kernel中时被调用*/
 bool echo_role::Init()
 {
 	//代表初始化成功
@@ -19,6 +20,8 @@ bool echo_role::Init()
 }
 
 //回显消息处理函数
+/*调用时机：原始数据转换成用户请求后*/
+//参数来自于协议对象raw2request的返回值
 UserData * echo_role::ProcMsg(UserData & _poUserData)
 {
 	//取出待回显的内容
@@ -35,6 +38,7 @@ UserData * echo_role::ProcMsg(UserData & _poUserData)
 	return nullptr;
 }
 
+/*在摘出kernel时被调用*/
 void echo_role::Fini()
 {
 }

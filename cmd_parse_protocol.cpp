@@ -14,6 +14,8 @@ cmd_parse_protocol::~cmd_parse_protocol()
 {
 }
 
+/*参数就是通道对象readfd的传参参数*/
+//调用时机，数据被读取之后
 UserData * cmd_parse_protocol::raw2request(std::string _szInput)
 {
 	//命令解析
@@ -35,6 +37,8 @@ UserData * cmd_parse_protocol::raw2request(std::string _szInput)
 	return pout;
 }
 
+/*调用时机：调用zinxSendOUt之后*/
+/*参数来自于sendout的第一个参数，返回值（转换的结果）要交给通道对象，被通道对象的writefd函数消费*/
 std::string * cmd_parse_protocol::response2raw(UserData & _oUserData)
 {
 	GET_REF2DATA(cmd_msg, output, _oUserData);
@@ -42,6 +46,8 @@ std::string * cmd_parse_protocol::response2raw(UserData & _oUserData)
 	return new std::string(output.echo_string);
 }
 
+/*确定谁来处理命令消息（cmd_msg对象）----》返回该对象*/
+/*在原始数据转换成用户请求后被调用*/
 Irole * cmd_parse_protocol::GetMsgProcessor(UserDataMsg & _oUserDataMsg)
 {
 	//记录数据来源的通道信息
