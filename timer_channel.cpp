@@ -79,6 +79,12 @@ AZinxHandler * timer_channel::GetInputNextStage(BytesMsg & _oInput)
 
 timeout_deliver::timeout_deliver()
 {
+	/*依次创建时间轮的所有刻度*/
+	for (int i = 0; i < 10; i++)
+	{
+		std::list<timeout_task *> tmp;
+		m_wheel.push_back(tmp);
+	}
 }
 
 timeout_deliver::~timeout_deliver()
@@ -106,19 +112,35 @@ IZinxMsg * timeout_deliver::InternelHandle(IZinxMsg & _oInput)
 
 	for (int i = 0; i < *pcont; i++)
 	{
-		/*遍历任务容器，减计数1*/
-		for (auto ptask : m_task_list)
+		std::list<timeout_task *> tmp_list;
+		/*遍历当前刻度所对应的list，减计数1*/
+		for (auto itr = m_wheel[cur_pos].begin(); itr != m_wheel[cur_pos].end(); )
 		{
-			//ptask 就是m_task_list容器中的每个元素
-			ptask->m_count--;
-			/*若减为0则超时，调用超时处理函数,重置计数*/
-			if (ptask->m_count <= 0)
+			/*若计数减为0了，则要调用处理函数，重置计数*/
+			if ((*itr)->m_count <= 0)
 			{
-				ptask->proc_timeout();
-				ptask->m_count = ptask->time_out;
+				/*超时了，暂存本次超时的任务节点*/
+				tmp_list.push_back((*itr));
+				/*要摘掉,后边重新添加*/
+				itr = m_wheel[cur_pos].erase(itr);
+				
+			}
+			else
+			{
+				/*减计数*/
+				(*itr)->m_count--;
+				itr++;
 			}
 		}
-
+		/*调用超时任务的处理函数，重新添加超时任务到时间轮*/
+		for (auto ptask : tmp_list)
+		{
+			ptask->proc_timeout();
+			register_task(ptask->time_out, ptask);
+		}
+		/*刻度向后移动一格*/
+		cur_pos++;
+		cur_pos %= m_wheel.size();
 		/*循环超时次数次*/
 	}	
 
@@ -134,12 +156,38 @@ AZinxHandler * timeout_deliver::GetNextHandler(IZinxMsg & _oNextMsg)
 
 void timeout_deliver::register_task(int _sec, timeout_task * _task)
 {
-	m_task_list.push_back(_task);
-	_task->m_count = _sec;
+	/*计算任务所在格子*/
+	int dest_grid = _sec % m_wheel.size() + cur_pos;
+	dest_grid %= m_wheel.size();
+	/*计算剩余计数*/
+	_task->m_count = _sec / m_wheel.size();
 	_task->time_out = _sec;
+
+	/*添加参数_task对象到对应格子的list里*/
+	m_wheel[dest_grid].push_back(_task);
+	
 }
 
 void timeout_deliver::unregister_task(timeout_task * _task)
 {
-	m_task_list.remove(_task);
+	/*遍历所有刻度*/
+	for (auto &grid : m_wheel)
+	{
+		bool find = false;
+		/*遍历该刻度对应的list---》删除*/
+		for (auto ptask : grid)
+		{
+			if (ptask == _task)
+			{
+				grid.remove(_task);
+				find = true;
+				break;
+			}
+		}
+		if (true == find)
+		{
+			break;
+		}
+	}
+	
 }

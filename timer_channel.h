@@ -35,8 +35,10 @@ class timeout_deliver :
 	/*单例对象指针*/
 	static timeout_deliver *m_single;
 
-	/*任务队列*/
-	std::list<timeout_task *> m_task_list;
+	/*时间轮*/
+	std::vector<std::list<timeout_task *>> m_wheel;
+	/*当前指向的刻度*/
+	int cur_pos = 0;
 public:
 
 	static timeout_deliver *GetInstance();
